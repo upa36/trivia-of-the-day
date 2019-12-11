@@ -5,9 +5,12 @@ const axios = require('axios')
 async function getQuestion() {
     const response = await axios.get('https://opentdb.com/api.php?amount=20&category=9&type=boolean')
     return {
+
         question: response.data.results[0].question,
         answer: response.data.results[0].correct_answer
+
     }
+
 }
 
 const CancelAndStopIntentsHandler = {
@@ -93,11 +96,11 @@ const YesIntent = {
             handlerInput.requestEnvelope.request.intent.name === 'AMAZON.YesIntent'
     },
     async handle(handlerInput) {
-        const question = await getQuestion()
+        const { question, answer } = await getQuestion()
 
         return handlerInput.responseBuilder
-            .speak(`Is this statement True or False <break strength='strong' />${question}<break strength='strong' />`)
-            .reprompt(`Is this statement True or False <break strength='strong' />${question}<break strength='strong' />`)
+            .speak(`Is this statement True or False: <break strength='strong' />${question}<break strength='strong' />`)
+            .reprompt(`Is this statement True or False: <break strength='strong' />${question}<break strength='strong' />`)
             .withShouldEndSession(false)
             .getResponse()
     },
@@ -110,11 +113,11 @@ const QuestionIntentHandler = {
     },
 
     async handle(handlerInput) {
-        const question = await getQuestion()
+        const { question, answer } = await getQuestion()
 
         return handlerInput.responseBuilder
-            .speak(`Is this statement True or False <break strength='strong' />${question}<break strength='strong' />`)
-            .reprompt(`Is this statement True or False <break strength='strong' />${question}<break strength='strong' />`)
+            .speak(`Is this statement True or False: <break strength='strong' />${question}<break strength='strong' />`)
+            .reprompt(`Is this statement True or False: <break strength='strong' />${question}<break strength='strong' />`)
             .withShouldEndSession(false)
             .getResponse()
     },
@@ -133,6 +136,21 @@ const ErrorHandler = {
             .getResponse()
     },
 }
+
+
+exports.handler = Builder
+    .addRequestHandlers(
+        CancelAndStopIntentsHandler,
+        FallbackIntentHandler,
+        HelpIntentHandler,
+        LaunchRequestHandler,
+        NoIntentHandler,
+        QuestionIntentHandler,
+        YesIntent,
+        SessionEndedRequestHandler
+    )
+    .addErrorHandlers(ErrorHandler)
+    .lambda()
 
 
 exports.handler = Builder
