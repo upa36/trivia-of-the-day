@@ -3,8 +3,11 @@ const Builder = alexa.SkillBuilders.custom()
 const axios = require('axios')
 
 async function getQuestion() {
-    const response = await axios.get('https://opentdb.com/api.php?amount=20&category=17')
-    return response.data.Question
+    const response = await axios.get('https://opentdb.com/api.php?amount=20&category=9&type=boolean')
+    return {
+        question: response.data.results[0].question,
+        answer: response.data.results[0].correct_answer
+    }
 }
 
 const CancelAndStopIntentsHandler = {
@@ -28,7 +31,7 @@ const FallbackIntentHandler = {
     },
     handle(handlerInput) {
         return handlerInput.responseBuilder
-            .speak("I am not sure what you were looking for. Do you want a trivia question?")
+            .speak("Sure. Do you want a trivia question?")
             .reprompt("Would you like a trivia question?")
             .withShouldEndSession(false)
             .getResponse()
@@ -54,7 +57,7 @@ const LaunchRequestHandler = {
     handle(handlerInput) {
         return handlerInput.responseBuilder
             .speak('Welcome, to the tivia of day! Would you like to try a trivia?')
-            .reprompt('Would you like a question from general knowledge?')
+            .reprompt('Welcome, to the tivia of day! Would you like to try a trivia?')
             .withShouldEndSession(false)
             .getResponse()
     },
@@ -90,11 +93,11 @@ const YesIntent = {
             handlerInput.requestEnvelope.request.intent.name === 'AMAZON.YesIntent'
     },
     async handle(handlerInput) {
-        const Question = await getQuestion()
+        const question = await getQuestion()
 
         return handlerInput.responseBuilder
-            .speak(`Here is your trivia: <break strength='strong' />${Question}<break strength='strong' /> Would you like another one?`)
-            .reprompt('Would you like one more trivia of the day?')
+            .speak(`Is this statement True or False <break strength='strong' />${question}<break strength='strong' />`)
+            .reprompt(`Is this statement True or False <break strength='strong' />${question}<break strength='strong' />`)
             .withShouldEndSession(false)
             .getResponse()
     },
@@ -107,15 +110,17 @@ const QuestionIntentHandler = {
     },
 
     async handle(handlerInput) {
-        const quiz = await getQuestionOfTheDay()
+        const question = await getQuestion()
 
         return handlerInput.responseBuilder
-            .speak(`Here is your trivia: <break strength='strong' />${quiz}<break strength='strong' /> Would you like another one?`)
-            .reprompt('Would you like to try a different one?')
+            .speak(`Is this statement True or False <break strength='strong' />${question}<break strength='strong' />`)
+            .reprompt(`Is this statement True or False <break strength='strong' />${question}<break strength='strong' />`)
             .withShouldEndSession(false)
             .getResponse()
     },
 }
+
+
 const ErrorHandler = {
     canHandle() {
         return true
